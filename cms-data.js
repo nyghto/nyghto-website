@@ -1,0 +1,66 @@
+window.NYGHTO_CMS_DATA = {
+  "phone": "+91 85905 64004",
+  "email": "hello@nyghto.in",
+  "location": "Kerala, India (Malappuram • Kochi)",
+  "heroTagline": "Design &\nEngineering",
+  "availabilityStatus": "ACCEPTING NEW CLIENT VENTURES",
+  "heroLocation": "11.0732° N, 76.0740° E // MALAPPURAM • KOCHI",
+  "consultTitle": "Talk Directly with Nyghto Founders",
+  "consultDesc": "Leave your number below for an instant callback, or reach out to our engineering team directly via WhatsApp, phone, or email.",
+  "projects": [
+    {
+      "id": "proj_alchemy",
+      "name": "Alchemy Taste The Magic",
+      "url": "https://alchemytastethemagic.in/",
+      "summary": "An enchanting digital experience and high-conversion brand web platform. We designed and engineered the complete storefront, fluid product animations, technician workflows, and a bespoke responsive user interface.",
+      "scope": "Brand Identity, Product Design, Full-Stack Web Development, Responsive UI",
+      "status": "Live in Production"
+    },
+    {
+      "id": "proj_fixowe",
+      "name": "FixOwe",
+      "url": "https://fixowe.com",
+      "summary": "An on-demand service and home maintenance booking platform. We designed and built the complete web platform from user service discovery, real-time booking flows, technician assignment, to automated invoicing.",
+      "scope": "Product Design, Full-Stack Web Development, Responsive UI",
+      "status": "Live in Production"
+    },
+    {
+      "id": "proj_ecoshopy",
+      "name": "EcoShopy",
+      "url": "https://ecoshopy.com",
+      "summary": "A modern sustainable e-commerce marketplace. We engineered a high-speed storefront focusing on rapid product filtering, fluid shopping cart interactions, and a clean, conversion-driven checkout experience.",
+      "scope": "E-Commerce Architecture, Storefront UI/UX, Checkout Flow",
+      "status": "Live in Production"
+    }
+  ],
+  "faqs": [
+    {
+      "question": "What is Nyghto?",
+      "answer": "<strong>Nyghto (nyghto.in)</strong> is an independent digital product design and software engineering studio. We build bespoke web applications, native iOS &amp; Android apps, multi-tenant SaaS platforms, and enterprise ERP systems with uncompromising craft and speed."
+    },
+    {
+      "question": "Where is Nyghto located?",
+      "answer": "Nyghto is based in <strong>Kerala, India (Malappuram &amp; Kochi)</strong>. We partner directly with local startups and enterprises across India, as well as high-growth ventures and founders globally across the US, UK, Europe, and Asia."
+    },
+    {
+      "question": "What live production projects has Nyghto built?",
+      "answer": "We have engineered and shipped production platforms including <strong><a href=\"https://alchemytastethemagic.in/\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:inherit; text-decoration:underline;\">Alchemy Taste The Magic (alchemytastethemagic.in)</a></strong>, <strong><a href=\"https://fixowe.com\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:inherit; text-decoration:underline;\">FixOwe (fixowe.com)</a></strong>, and <strong><a href=\"https://ecoshopy.com\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:inherit; text-decoration:underline;\">EcoShopy (ecoshopy.com)</a></strong>."
+    },
+    {
+      "question": "What technologies and frameworks does Nyghto use?",
+      "answer": "Our core tech stack includes <strong>Next.js 15, React, TypeScript, Node.js, Go, PostgreSQL, Redis, Swift (iOS), Kotlin (Android), React Native, and TailwindCSS</strong>, deployed on scalable Edge CDN infrastructure with 100/100 Core Web Vitals."
+    },
+    {
+      "question": "How affordable are Nyghto's development services?",
+      "answer": "We believe elite software design and engineering should be accessible. By operating with lean, direct founder-level collaboration and zero middle-management bureaucracy, we deliver world-class products at transparent, competitive rates for startups and scaling businesses."
+    },
+    {
+      "question": "How can I contact the Nyghto team?",
+      "answer": "You can message our founders directly on <strong><a href=\"https://wa.me/918590564004\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color:inherit; text-decoration:underline;\">WhatsApp Business (+91 85905 64004)</a></strong>, email us at <strong><a href=\"mailto:hello@nyghto.in\" style=\"color:inherit; text-decoration:underline;\">hello@nyghto.in</a></strong>, or call our direct phone lines: <strong>+91 85905 64004</strong>, <strong>+91 80759 11860</strong>, or <strong>+91 95392 02847</strong>."
+    },
+    {
+      "question": "Is Nyghto related to \"Nighto\" or other entities?",
+      "answer": "No. Nyghto (spelled N-Y-G-H-T-O, official website https://nyghto.in) is an independent digital product design and software development studio founded in Kerala, India. It specializes in web applications, iOS/Android mobile apps, SaaS, and ERP software."
+    }
+  ]
+};

@@ -82,6 +82,14 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
+  <!-- Static CMS Store (Instant Mobile & Offline Sync) -->
+  <script src="cms-data.js"></script>
+  <!-- Firebase 10 App, Auth & Firestore SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
   <link rel="stylesheet" href="styles.css">
 
   <!-- Comprehensive Structured Data / JSON-LD Knowledge Graph (Enterprise SEO & Knowledge Graph Graph) -->
@@ -401,7 +409,7 @@
       <nav class="frame-nav" aria-label="Main Navigation">
         <a href="#about" class="frame-link dot-box">ABOUT</a>
         <a href="#services" class="frame-link dot-box">SERVICES</a>
-        <a href="work.html" class="frame-link dot-box">WORK ↗</a>
+        <a href="#work" class="frame-link dot-box">WORK ↗</a>
         <a href="manifesto.html" class="frame-link dot-box">MANIFESTO ↗</a>
         <a href="domains.html" class="frame-link dot-box">DOMAINS ↗</a>
         <a href="portal.html" class="frame-link dot-box" style="color: #60A5FA; font-weight: 800;">PORTAL ↗</a>
@@ -450,7 +458,7 @@
     <nav class="drawer-links-stack">
       <a href="#about" class="drawer-link">ABOUT</a>
       <a href="#services" class="drawer-link">SERVICES</a>
-      <a href="work.html" class="drawer-link">WORK ↗</a>
+      <a href="#work" class="drawer-link">WORK ↗</a>
       <a href="manifesto.html" class="drawer-link">MANIFESTO ↗</a>
       <a href="domains.html" class="drawer-link">DOMAINS ↗</a>
       <a href="portal.html" class="drawer-link" style="color: #60A5FA; font-weight: 800;">CLIENT PORTAL ↗</a>
@@ -941,6 +949,101 @@
           <div class="scroll-stack-end"></div>
 
         </div>
+      </div>
+    </section>
+
+    <!-- SELECTED WORK & PRODUCTION SHOWCASE -->
+    <section class="services-list-section" id="work" aria-label="Selected Production Work" style="padding-top: 5rem; padding-bottom: 5rem; border-top: 1px solid var(--c-border);">
+      <div class="services-header-hud" style="margin-bottom: 2rem;">
+        <div class="hud-left">
+          <span class="hud-tag font-mono">Case Studies &amp; Showcase</span>
+          <h2 class="services-title font-display">Crafted in Production</h2>
+        </div>
+        <div class="hud-right">
+          <a href="work.html" class="editorial-archive-link dot-box font-mono" style="font-size: 0.85rem; padding: 8px 16px;">
+            EXPLORE FULL ARCHIVE ↗
+          </a>
+        </div>
+      </div>
+
+      <div class="editorial-project-list" id="homeWorkProjectList" aria-label="Production Projects Showcase">
+        <!-- PROJECT 01: ALCHEMY -->
+        <article class="editorial-project-row">
+          <div class="project-num-col font-mono">01</div>
+          <div class="project-info-col">
+            <div class="project-header-line">
+              <h2 class="project-big-name font-display">Alchemy Taste The Magic</h2>
+              <a href="https://alchemytastethemagic.in/" target="_blank" rel="noopener noreferrer" class="project-live-badge font-mono dot-box" aria-label="Visit Alchemy Live Website">
+                alchemytastethemagic.in ↗
+              </a>
+            </div>
+            <p class="project-human-summary font-sans">
+              An enchanting digital experience and high-conversion brand web platform. We designed and engineered the complete storefront, fluid product animations, technician workflows, and a bespoke responsive user interface.
+            </p>
+            <div class="project-details-bar font-mono">
+              <div class="p-detail-item">
+                <span class="p-detail-key">SCOPE</span>
+                <span class="p-detail-val">Brand Identity, Product Design, Full-Stack Web Development, Responsive UI</span>
+              </div>
+              <div class="p-detail-item">
+                <span class="p-detail-key">STATUS</span>
+                <span class="p-detail-val">Live in Production</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PROJECT 02: FIXOWE -->
+        <article class="editorial-project-row">
+          <div class="project-num-col font-mono">02</div>
+          <div class="project-info-col">
+            <div class="project-header-line">
+              <h2 class="project-big-name font-display">FixOwe</h2>
+              <a href="https://fixowe.com" target="_blank" rel="noopener noreferrer" class="project-live-badge font-mono dot-box" aria-label="Visit FixOwe Live Website">
+                fixowe.com ↗
+              </a>
+            </div>
+            <p class="project-human-summary font-sans">
+              An on-demand service and home maintenance booking platform. We designed and built the complete web platform from user service discovery, real-time booking flows, technician assignment, to automated invoicing.
+            </p>
+            <div class="project-details-bar font-mono">
+              <div class="p-detail-item">
+                <span class="p-detail-key">SCOPE</span>
+                <span class="p-detail-val">Product Design, Full-Stack Web Development, Responsive UI</span>
+              </div>
+              <div class="p-detail-item">
+                <span class="p-detail-key">STATUS</span>
+                <span class="p-detail-val">Live in Production</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PROJECT 03: ECOSHOPY -->
+        <article class="editorial-project-row">
+          <div class="project-num-col font-mono">03</div>
+          <div class="project-info-col">
+            <div class="project-header-line">
+              <h2 class="project-big-name font-display">EcoShopy</h2>
+              <a href="https://ecoshopy.com" target="_blank" rel="noopener noreferrer" class="project-live-badge font-mono dot-box" aria-label="Visit EcoShopy Live Website">
+                ecoshopy.com ↗
+              </a>
+            </div>
+            <p class="project-human-summary font-sans">
+              A modern sustainable e-commerce marketplace. We engineered a high-speed storefront focusing on rapid product filtering, fluid shopping cart interactions, and a clean, conversion-driven checkout experience.
+            </p>
+            <div class="project-details-bar font-mono">
+              <div class="p-detail-item">
+                <span class="p-detail-key">SCOPE</span>
+                <span class="p-detail-val">E-Commerce Architecture, Storefront UI/UX, Checkout Flow</span>
+              </div>
+              <div class="p-detail-item">
+                <span class="p-detail-key">STATUS</span>
+                <span class="p-detail-val">Live in Production</span>
+              </div>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
 

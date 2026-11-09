@@ -14,6 +14,8 @@
 
   <link rel="stylesheet" href="admin.css">
 
+  <!-- Static CMS Store (Direct Sync Fallback) -->
+  <script src="cms-data.js"></script>
   <!-- Firebase 10 App, Auth & Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -566,9 +568,12 @@
           </p>
         </div>
 
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <a href="index.html" target="_blank" class="admin-btn-secondary font-mono" style="text-decoration: none;">
-            <span>Preview Live Site ↗</span>
+            <span>Preview Home ↗</span>
+          </a>
+          <a href="work.html" target="_blank" class="admin-btn-secondary font-mono" style="text-decoration: none;">
+            <span>Preview Work ↗</span>
           </a>
           <button type="button" class="admin-btn-primary font-mono" onclick="saveWebsiteCmsChanges()">
             <span>Save &amp; Publish ↗</span>
@@ -679,14 +684,36 @@ Engineering</h3>
 
         <!-- SECTION 3: WORK & PORTFOLIO SHOWCASE -->
         <section class="admin-card cms-section-card" id="section_site_work">
-          <div class="admin-card-header">
+          <div class="admin-card-header" style="flex-wrap: wrap; gap: 10px;">
             <div>
-              <h4 class="admin-card-title">3. Production Case Studies &amp; Showcase (work.html)</h4>
-              <span class="admin-card-sub">Manage featured production projects, links, scopes, and descriptions.</span>
+              <h4 class="admin-card-title">3. Production Case Studies &amp; Showcase (work.html &amp; Home)</h4>
+              <span class="admin-card-sub">Manage featured production projects, links, scopes, and descriptions shown across the website.</span>
             </div>
-            <button type="button" class="admin-btn-primary font-mono" onclick="addNewWorkProjectItem()">
-              <span>+ Add Project ↗</span>
-            </button>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <a href="work.html" target="_blank" class="admin-btn-secondary font-mono" style="text-decoration: none; padding: 6px 12px; font-size: 0.78rem;">
+                <span>View work.html ↗</span>
+              </a>
+              <a href="index.html#work" target="_blank" class="admin-btn-secondary font-mono" style="text-decoration: none; padding: 6px 12px; font-size: 0.78rem;">
+                <span>View on Home ↗</span>
+              </a>
+              <button type="button" class="admin-btn-secondary font-mono" onclick="downloadCmsDataJson()" style="padding: 6px 12px; font-size: 0.78rem;">
+                <span>📥 Export JSON</span>
+              </button>
+              <button type="button" class="admin-btn-primary font-mono" onclick="addNewWorkProjectItem()" style="padding: 6px 14px; font-size: 0.78rem;">
+                <span>+ Add Project ↗</span>
+              </button>
+              <button type="button" class="admin-btn-primary font-mono" onclick="saveWebsiteCmsChanges()" style="background: #10B981; border-color: #059669; padding: 6px 14px; font-size: 0.78rem;">
+                <span>💾 Save Showcase</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mobile Live Preview Notification -->
+          <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px 14px; margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 0.8rem; color: #1E40AF;">
+              <strong>📱 Mobile Testing URL:</strong> Open <a href="http://192.168.31.71:3000/" target="_blank" style="color: #1D4ED8; font-weight: 700; text-decoration: underline;">http://192.168.31.71:3000/</a> on your phone's browser (same Wi-Fi) to preview all works instantly!
+            </div>
+            <span class="font-mono" style="font-size: 0.74rem; color: #10B981; font-weight: 700;">⚡ Auto-Saved &amp; Real-Time Synced</span>
           </div>
 
           <!-- Dynamic Projects List Container -->

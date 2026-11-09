@@ -922,6 +922,36 @@ function initFaqAccordion() {
    10. Dynamic CMS Content Sync (Synced from Nyghto Studio Admin Command Center)
    ========================================================================== */
 function initSiteCmsOverrides() {
+  function renderProjectCardHtml(p, i) {
+    const numStr = (i + 1).toString().padStart(2, '0');
+    return `
+      <article class="editorial-project-row">
+        <div class="project-num-col font-mono">${numStr}</div>
+        <div class="project-info-col">
+          <div class="project-header-line">
+            <h2 class="project-big-name font-display">${escapeHtml(p.name || 'Untitled Project')}</h2>
+            ${p.url ? `
+              <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="project-live-badge font-mono dot-box" aria-label="Visit ${escapeHtml(p.name)}">
+                ${escapeHtml(p.url.replace(/^https?:\/\//, ''))} ↗
+              </a>
+            ` : ''}
+          </div>
+          <p class="project-human-summary font-sans">${escapeHtml(p.summary || '')}</p>
+          <div class="project-details-bar font-mono">
+            <div class="p-detail-item">
+              <span class="p-detail-key">SCOPE</span>
+              <span class="p-detail-val">${escapeHtml(p.scope || 'Design & Engineering')}</span>
+            </div>
+            <div class="p-detail-item">
+              <span class="p-detail-key">STATUS</span>
+              <span class="p-detail-val">${escapeHtml(p.status || 'Live in Production')}</span>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
   function applyCms(cfg) {
     if (!cfg) return;
 
@@ -999,39 +1029,25 @@ function initSiteCmsOverrides() {
       }
     }
 
-    // 7. Dynamic Work Projects Rendering (work.html)
+    // 7. Dynamic Work Projects Rendering (both work.html AND index.html)
     if (cfg.projects && Array.isArray(cfg.projects) && cfg.projects.length > 0) {
+      const htmlContent = cfg.projects.map(renderProjectCardHtml).join('');
+
+      // Render on work.html showcase container
       const workList = document.getElementById('workProjectList');
       if (workList) {
-        workList.innerHTML = cfg.projects.map((p, i) => {
-          const numStr = (i + 1).toString().padStart(2, '0');
-          return `
-            <article class="editorial-project-row">
-              <div class="project-num-col font-mono">${numStr}</div>
-              <div class="project-info-col">
-                <div class="project-header-line">
-                  <h2 class="project-big-name font-display">${escapeHtml(p.name)}</h2>
-                  ${p.url ? `
-                    <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="project-live-badge font-mono dot-box" aria-label="Visit ${escapeHtml(p.name)}">
-                      ${escapeHtml(p.url.replace(/^https?:\/\//, ''))} ↗
-                    </a>
-                  ` : ''}
-                </div>
-                <p class="project-human-summary font-sans">${escapeHtml(p.summary)}</p>
-                <div class="project-details-bar font-mono">
-                  <div class="p-detail-item">
-                    <span class="p-detail-key">SCOPE</span>
-                    <span class="p-detail-val">${escapeHtml(p.scope || 'Design & Engineering')}</span>
-                  </div>
-                  <div class="p-detail-item">
-                    <span class="p-detail-key">STATUS</span>
-                    <span class="p-detail-val">${escapeHtml(p.status || 'Live in Production')}</span>
-                  </div>
-                </div>
-              </div>
-            </article>
-          `;
-        }).join('');
+        workList.innerHTML = htmlContent;
+      }
+
+      // Render on index.html showcase container
+      const homeWorkList = document.getElementById('homeWorkProjectList');
+      if (homeWorkList) {
+        homeWorkList.innerHTML = htmlContent;
+      }
+
+      // Refresh ScrollTrigger so pinning & mobile parallax don't get miscalculated
+      if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
+        ScrollTrigger.refresh();
       }
     }
   }
@@ -1045,13 +1061,40 @@ function initSiteCmsOverrides() {
       .replace(/"/g, '&quot;');
   }
 
-  // Load from local cache immediately
+  // 1. Immediately apply embedded static CMS store if available (instant on mobile & offline)
+  if (window.NYGHTO_CMS_DATA) {
+    applyCms(window.NYGHTO_CMS_DATA);
+  }
+
+  // 2. Load from local cache
   try {
     const cached = JSON.parse(localStorage.getItem('nyghto_site_cms') || 'null');
     if (cached) applyCms(cached);
   } catch (e) {}
 
-  // If Firebase is initialized, check remote config
+  // 3. Fetch live data from server API (/api/cms) or fallback to /cms-data.json
+  const fetchCmsData = (url) => fetch(url, { cache: 'no-cache' }).then(r => r.ok ? r.json() : Promise.reject());
+  fetchCmsData('/api/cms')
+    .catch(() => fetchCmsData('/cms-data.json'))
+    .then(cfg => {
+      if (cfg) {
+        applyCms(cfg);
+        try { localStorage.setItem('nyghto_site_cms', JSON.stringify(cfg)); } catch (e) {}
+      }
+    })
+    .catch(() => {});
+
+  // 4. Listen for cross-tab storage changes (Real-Time multi-tab sync)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'nyghto_site_cms' && e.newValue) {
+      try {
+        const updated = JSON.parse(e.newValue);
+        if (updated) applyCms(updated);
+      } catch (err) {}
+    }
+  });
+
+  // 5. If Firebase is initialized, check remote config
   if (window.nyghtoFirebase && typeof window.nyghtoFirebase.getSiteConfig === 'function') {
     window.nyghtoFirebase.getSiteConfig().then(cfg => {
       if (cfg) applyCms(cfg);

@@ -2744,7 +2744,30 @@ body.theme-yellow .cta1-phone-input:focus {
   }
 
   .editorial-project-row, .principle-block {
-    padding: 3rem 0;
+    padding: 2.2rem 0;
+    gap: 1rem;
+  }
+
+  .project-header-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .project-big-name {
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    word-break: break-word;
+  }
+
+  .project-live-badge {
+    align-self: flex-start;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
+  .project-details-bar {
+    gap: 1.2rem;
+    font-size: 0.8rem;
   }
 
   .studio-standard-table {

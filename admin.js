@@ -1221,11 +1221,52 @@ const DEFAULT_SITE_CMS = {
 };
 
 let currentSiteCmsData = null;
+let cmsAutoSaveTimer = null;
+
+function triggerCmsAutoSave() {
+  clearTimeout(cmsAutoSaveTimer);
+  cmsAutoSaveTimer = setTimeout(() => {
+    saveWebsiteCmsChanges(true);
+  }, 1200);
+}
+
+function downloadCmsDataJson() {
+  syncProjectsFromDom();
+  const payload = currentSiteCmsData || DEFAULT_SITE_CMS;
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+  const dl = document.createElement('a');
+  dl.setAttribute("href", dataStr);
+  dl.setAttribute("download", "cms-data.json");
+  document.body.appendChild(dl);
+  dl.click();
+  dl.remove();
+  showToast("✓ cms-data.json exported to your downloads folder!");
+}
 
 async function loadWebsiteCmsConfig() {
   let cfg = null;
 
-  if (window.nyghtoFirebase && typeof window.nyghtoFirebase.getSiteConfig === 'function') {
+  // 1. Try embedded static store first (instant synchronous data)
+  if (window.NYGHTO_CMS_DATA) {
+    cfg = window.NYGHTO_CMS_DATA;
+  }
+
+  // 2. Try local server endpoint (/api/cms)
+  try {
+    const res = await fetch('/api/cms', { cache: 'no-cache' });
+    if (res.ok) {
+      cfg = await res.json();
+    }
+  } catch (e) {
+    // Fallback to static cms-data.json
+    try {
+      const res = await fetch('/cms-data.json', { cache: 'no-cache' });
+      if (res.ok) cfg = await res.json();
+    } catch (err) {}
+  }
+
+  // 3. Try Firebase if available
+  if (!cfg && window.nyghtoFirebase && typeof window.nyghtoFirebase.getSiteConfig === 'function') {
     try {
       cfg = await window.nyghtoFirebase.getSiteConfig();
     } catch (e) {
@@ -1233,6 +1274,7 @@ async function loadWebsiteCmsConfig() {
     }
   }
 
+  // 4. Fallback to LocalStorage
   if (!cfg) {
     try {
       cfg = JSON.parse(localStorage.getItem('nyghto_site_cms') || 'null');
@@ -1280,7 +1322,7 @@ function renderWorkProjectsEditor() {
   if (!container || !currentSiteCmsData) return;
 
   container.innerHTML = (currentSiteCmsData.projects || []).map((p, idx) => `
-    <div class="admin-card" style="margin-bottom: 0; background: #F8FAFC; border: 1px solid var(--admin-border);">
+    <div class="admin-card cms-project-card" style="margin-bottom: 0; background: #F8FAFC; border: 1px solid var(--admin-border);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
         <span class="font-mono" style="font-size: 0.8rem; font-weight: 800; color: var(--admin-primary);">PROJECT 0${idx + 1}</span>
         <button type="button" class="admin-btn-secondary font-mono" onclick="deleteWorkProjectItem(${idx})" style="color: var(--admin-danger); padding: 4px 8px;">✕ Remove</button>
@@ -1289,30 +1331,30 @@ function renderWorkProjectsEditor() {
       <div class="admin-form-row">
         <div class="admin-input-group">
           <label class="admin-input-label font-mono">Project Name</label>
-          <input type="text" class="admin-input" value="${escapeHtml(p.name)}" oninput="updateWorkProjectItem(${idx}, 'name', this.value)" required>
+          <input type="text" class="admin-input cms-proj-name" value="${escapeHtml(p.name)}" oninput="updateWorkProjectItem(${idx}, 'name', this.value)" required>
         </div>
 
         <div class="admin-input-group">
           <label class="admin-input-label font-mono">Live URL</label>
-          <input type="text" class="admin-input font-mono" value="${escapeHtml(p.url || '')}" oninput="updateWorkProjectItem(${idx}, 'url', this.value)" placeholder="https://...">
+          <input type="text" class="admin-input font-mono cms-proj-url" value="${escapeHtml(p.url || '')}" oninput="updateWorkProjectItem(${idx}, 'url', this.value)" placeholder="https://...">
         </div>
       </div>
 
       <div class="admin-form-row">
         <div class="admin-input-group">
           <label class="admin-input-label font-mono">Deliverable Scope</label>
-          <input type="text" class="admin-input" value="${escapeHtml(p.scope || '')}" oninput="updateWorkProjectItem(${idx}, 'scope', this.value)" placeholder="e.g. Full-Stack Web Development, Responsive UI">
+          <input type="text" class="admin-input cms-proj-scope" value="${escapeHtml(p.scope || '')}" oninput="updateWorkProjectItem(${idx}, 'scope', this.value)" placeholder="e.g. Full-Stack Web Development, Responsive UI">
         </div>
 
         <div class="admin-input-group">
           <label class="admin-input-label font-mono">Status Badge</label>
-          <input type="text" class="admin-input font-mono" value="${escapeHtml(p.status || 'Live in Production')}" oninput="updateWorkProjectItem(${idx}, 'status', this.value)">
+          <input type="text" class="admin-input font-mono cms-proj-status" value="${escapeHtml(p.status || 'Live in Production')}" oninput="updateWorkProjectItem(${idx}, 'status', this.value)">
         </div>
       </div>
 
       <div class="admin-input-group">
         <label class="admin-input-label font-mono">Project Summary</label>
-        <textarea class="admin-input" rows="2" oninput="updateWorkProjectItem(${idx}, 'summary', this.value)">${escapeHtml(p.summary || '')}</textarea>
+        <textarea class="admin-input cms-proj-summary" rows="2" oninput="updateWorkProjectItem(${idx}, 'summary', this.value)">${escapeHtml(p.summary || '')}</textarea>
       </div>
     </div>
   `).join('');
@@ -1321,13 +1363,19 @@ function renderWorkProjectsEditor() {
 function updateWorkProjectItem(idx, key, val) {
   if (currentSiteCmsData && currentSiteCmsData.projects && currentSiteCmsData.projects[idx]) {
     currentSiteCmsData.projects[idx][key] = val;
+    triggerCmsAutoSave();
   }
 }
 
-function addNewWorkProjectItem() {
-  if (!currentSiteCmsData) return;
+async function addNewWorkProjectItem() {
+  if (!currentSiteCmsData) currentSiteCmsData = { ...DEFAULT_SITE_CMS };
   if (!currentSiteCmsData.projects) currentSiteCmsData.projects = [];
-  currentSiteCmsData.projects.push({
+  
+  // Scrape any currently unsaved input values first
+  syncProjectsFromDom();
+
+  currentSiteCmsData.projects.unshift({
+    id: "proj_" + Date.now(),
     name: "New Production Project",
     url: "https://project.com",
     scope: "Design, Frontend & Backend Engineering",
@@ -1335,13 +1383,43 @@ function addNewWorkProjectItem() {
     summary: "Brief project overview and architectural deliverables shipped by Nyghto Studio."
   });
   renderWorkProjectsEditor();
-  showToast('New project slot added.');
+  await saveWebsiteCmsChanges(true);
+  showToast('New project slot created & published live!');
 }
 
-function deleteWorkProjectItem(idx) {
+async function deleteWorkProjectItem(idx) {
   if (!confirm('Remove this project from the showcase?')) return;
+  syncProjectsFromDom();
   currentSiteCmsData.projects.splice(idx, 1);
   renderWorkProjectsEditor();
+  await saveWebsiteCmsChanges(true);
+  showToast('Project removed & published live.');
+}
+
+function syncProjectsFromDom() {
+  const cards = document.querySelectorAll('#cmsWorkProjectsContainer .cms-project-card');
+  if (!cards || cards.length === 0) return;
+  const list = [];
+  cards.forEach((card, idx) => {
+    const name = card.querySelector('.cms-proj-name')?.value.trim() || '';
+    const url = card.querySelector('.cms-proj-url')?.value.trim() || '';
+    const scope = card.querySelector('.cms-proj-scope')?.value.trim() || '';
+    const status = card.querySelector('.cms-proj-status')?.value.trim() || 'Live in Production';
+    const summary = card.querySelector('.cms-proj-summary')?.value.trim() || '';
+    if (name) {
+      list.push({
+        id: (currentSiteCmsData?.projects?.[idx]?.id) || ('proj_' + Math.random().toString(36).substr(2, 9)),
+        name,
+        url,
+        scope,
+        status,
+        summary
+      });
+    }
+  });
+  if (list.length > 0 && currentSiteCmsData) {
+    currentSiteCmsData.projects = list;
+  }
 }
 
 function renderFaqEditor() {
@@ -1349,7 +1427,7 @@ function renderFaqEditor() {
   if (!container || !currentSiteCmsData) return;
 
   container.innerHTML = (currentSiteCmsData.faqs || []).map((f, idx) => `
-    <div class="admin-card" style="margin-bottom: 0; background: #F8FAFC; border: 1px solid var(--admin-border);">
+    <div class="admin-card cms-faq-card" style="margin-bottom: 0; background: #F8FAFC; border: 1px solid var(--admin-border);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
         <span class="font-mono" style="font-size: 0.8rem; font-weight: 800; color: #D97706;">FAQ 0${idx + 1}</span>
         <button type="button" class="admin-btn-secondary font-mono" onclick="deleteFaqItem(${idx})" style="color: var(--admin-danger); padding: 4px 8px;">✕ Remove</button>
@@ -1357,12 +1435,12 @@ function renderFaqEditor() {
 
       <div class="admin-input-group" style="margin-bottom: 0.8rem;">
         <label class="admin-input-label font-mono">Question</label>
-        <input type="text" class="admin-input font-display" value="${escapeHtml(f.question)}" oninput="updateFaqItem(${idx}, 'question', this.value)" required>
+        <input type="text" class="admin-input font-display cms-faq-question" value="${escapeHtml(f.question)}" oninput="updateFaqItem(${idx}, 'question', this.value)" required>
       </div>
 
       <div class="admin-input-group">
         <label class="admin-input-label font-mono">Answer (HTML allowed)</label>
-        <textarea class="admin-input" rows="3" oninput="updateFaqItem(${idx}, 'answer', this.value)">${escapeHtml(f.answer)}</textarea>
+        <textarea class="admin-input cms-faq-answer" rows="3" oninput="updateFaqItem(${idx}, 'answer', this.value)">${escapeHtml(f.answer)}</textarea>
       </div>
     </div>
   `).join('');
@@ -1371,10 +1449,11 @@ function renderFaqEditor() {
 function updateFaqItem(idx, key, val) {
   if (currentSiteCmsData && currentSiteCmsData.faqs && currentSiteCmsData.faqs[idx]) {
     currentSiteCmsData.faqs[idx][key] = val;
+    triggerCmsAutoSave();
   }
 }
 
-function addNewFaqItem() {
+async function addNewFaqItem() {
   if (!currentSiteCmsData) return;
   if (!currentSiteCmsData.faqs) currentSiteCmsData.faqs = [];
   currentSiteCmsData.faqs.push({
@@ -1382,16 +1461,38 @@ function addNewFaqItem() {
     answer: "Detailed answer explaining studio engineering processes, deliverables, or technologies."
   });
   renderFaqEditor();
-  showToast('New FAQ item added.');
+  await saveWebsiteCmsChanges(true);
+  showToast('New FAQ item added & published live.');
 }
 
-function deleteFaqItem(idx) {
+async function deleteFaqItem(idx) {
   if (!confirm('Remove this FAQ item?')) return;
   currentSiteCmsData.faqs.splice(idx, 1);
   renderFaqEditor();
+  await saveWebsiteCmsChanges(true);
+  showToast('FAQ removed & published live.');
 }
 
-async function saveWebsiteCmsChanges() {
+async function saveWebsiteCmsChanges(silent = false) {
+  // Always synchronize any in-progress input values from DOM cards
+  syncProjectsFromDom();
+
+  const faqCards = document.querySelectorAll('#cmsFaqItemsContainer .cms-faq-card');
+  let faqsList = [];
+  if (faqCards && faqCards.length > 0) {
+    faqCards.forEach(card => {
+      const question = card.querySelector('.cms-faq-question')?.value.trim() || '';
+      const answer = card.querySelector('.cms-faq-answer')?.value.trim() || '';
+      if (question) {
+        faqsList.push({ question, answer });
+      }
+    });
+  } else if (currentSiteCmsData && currentSiteCmsData.faqs) {
+    faqsList = currentSiteCmsData.faqs;
+  } else {
+    faqsList = DEFAULT_SITE_CMS.faqs;
+  }
+
   const updatedCfg = {
     phone: document.getElementById('cmsSitePhone')?.value.trim() || DEFAULT_SITE_CMS.phone,
     email: document.getElementById('cmsSiteEmail')?.value.trim() || DEFAULT_SITE_CMS.email,
@@ -1401,17 +1502,30 @@ async function saveWebsiteCmsChanges() {
     heroLocation: document.getElementById('cmsHeroSubtitle')?.value.trim() || DEFAULT_SITE_CMS.heroLocation,
     consultTitle: document.getElementById('cmsConsultTitle')?.value.trim() || DEFAULT_SITE_CMS.consultTitle,
     consultDesc: document.getElementById('cmsConsultDesc')?.value.trim() || DEFAULT_SITE_CMS.consultDesc,
-    projects: (currentSiteCmsData && currentSiteCmsData.projects) ? currentSiteCmsData.projects : DEFAULT_SITE_CMS.projects,
-    faqs: (currentSiteCmsData && currentSiteCmsData.faqs) ? currentSiteCmsData.faqs : DEFAULT_SITE_CMS.faqs,
+    projects: (currentSiteCmsData && currentSiteCmsData.projects && currentSiteCmsData.projects.length > 0) ? currentSiteCmsData.projects : DEFAULT_SITE_CMS.projects,
+    faqs: faqsList,
     updatedAt: new Date().toISOString()
   };
 
   currentSiteCmsData = updatedCfg;
 
-  // 1. Save to localStorage
-  localStorage.setItem('nyghto_site_cms', JSON.stringify(updatedCfg));
+  // 1. Save to localStorage immediately
+  try {
+    localStorage.setItem('nyghto_site_cms', JSON.stringify(updatedCfg));
+  } catch (e) {}
 
-  // 2. Save to Firestore
+  // 2. Persist to server /api/cms endpoint so all browsers/devices receive it
+  try {
+    await fetch('/api/cms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedCfg)
+    });
+  } catch (e) {
+    console.warn('Server CMS sync notice:', e);
+  }
+
+  // 3. Save to Firebase Firestore if reachable
   if (window.nyghtoFirebase && typeof window.nyghtoFirebase.saveSiteConfig === 'function') {
     try {
       await window.nyghtoFirebase.saveSiteConfig(updatedCfg);
@@ -1420,12 +1534,15 @@ async function saveWebsiteCmsChanges() {
     }
   }
 
-  showToast('✓ All Website CMS changes published live!');
+  if (!silent) {
+    showToast('✓ All Website CMS changes published live!');
+  }
 }
 
 function resetDefaultWebsiteCms() {
   if (!confirm('Reset website configuration to default values?')) return;
   localStorage.setItem('nyghto_site_cms', JSON.stringify(DEFAULT_SITE_CMS));
   loadWebsiteCmsConfig();
+  saveWebsiteCmsChanges();
   showToast('Defaults restored.');
 }
